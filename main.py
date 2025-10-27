@@ -1,11 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-size_of_matrix = 100
-# ================================================================
-#   Генерация изображений цифр (10x10)
-# ================================================================
+size_of_matrix = 10
 def generate_digit_matrix(digit, size=10):
-    """Создаёт бинарное изображение цифры (матрицу size×size)."""
     img = np.zeros((size, size))
     if digit == 0:
         img[1:-1, 1] = 1; img[1:-1, -2] = 1
@@ -42,7 +38,6 @@ def generate_digit_matrix(digit, size=10):
     return img
 
 def create_dataset(samples_per_digit=200, noise_level=0.2):
-    """Создаёт X (векторы изображений) и y (метки) для обучения."""
     X, y = [], []
     for digit in range(10):
         base = generate_digit_matrix(digit,size_of_matrix)
@@ -53,18 +48,12 @@ def create_dataset(samples_per_digit=200, noise_level=0.2):
             y.append(digit)
     return np.array(X), np.array(y)
 
-# ================================================================
-#   Подготовка данных
-# ================================================================
 X_train, y_train = create_dataset(samples_per_digit=300, noise_level=0.25)
 X_val, y_val = create_dataset(samples_per_digit=80, noise_level=0.25)
 
-# ================================================================
-#   Инициализация нейросети
-# ================================================================
-input_size = 10000 
+input_size = 100 
 hidden_size = 32
-output_size = 1000
+output_size = 10
 learning_rate = 0.1
 batch_size = 64
 epochs = 30
@@ -75,9 +64,6 @@ b1 = np.zeros((1, hidden_size))
 W2 = np.random.randn(hidden_size, output_size) * 0.01
 b2 = np.zeros((1, output_size))
 
-# ================================================================
-#   Функции активации и потерь
-# ================================================================
 def relu(x): return np.maximum(0, x)
 def relu_derivative(x): return (x > 0).astype(float)
 
@@ -96,9 +82,6 @@ def accuracy(probs, targets):
     preds = np.argmax(probs, axis=1)
     return np.mean(preds == targets)
 
-# ================================================================
-#   Обучение
-# ================================================================
 train_loss_hist, val_loss_hist = [], []
 train_acc_hist, val_acc_hist = [], []
 
@@ -169,12 +152,8 @@ def train(X_train, y_train, X_val=None, y_val=None):
               f"train_loss={epoch_loss:.4f}, train_acc={epoch_acc:.4f}, "
               f"val_loss={val_loss:.4f}, val_acc={val_acc:.4f}")
 
-# Запуск обучения
 train(X_train, y_train, X_val, y_val)
 
-# ================================================================
-#   Визуализация обучения
-# ================================================================
 plt.figure(figsize=(10,4))
 plt.subplot(1,2,1)
 plt.plot(train_loss_hist, label="Train Loss")
@@ -187,9 +166,6 @@ plt.plot(val_acc_hist, label="Val Accuracy")
 plt.legend(); plt.title("Точность")
 plt.show()
 
-# ================================================================
-#   Проверка предсказаний на разных сериях тестов
-# ================================================================
 def predict(X):
     Z1 = np.dot(X, W1) + b1
     A1 = relu(Z1)
@@ -197,7 +173,6 @@ def predict(X):
     return np.argmax(stable_softmax(Z2), axis=1)
 
 def test_network(X_val, y_val, num_tests=3, samples=10):
-    """Проводит несколько раундов проверки сети."""
     for t in range(num_tests):
         indices = np.random.choice(len(X_val), samples)
         X_sample, y_true = X_val[indices], y_val[indices]
@@ -211,5 +186,5 @@ def test_network(X_val, y_val, num_tests=3, samples=10):
             ax.axis("off")
         plt.show()
 
-# Запускаем три серии тестов по 10 примеров
 test_network(X_val, y_val, num_tests=3, samples=10)
+
